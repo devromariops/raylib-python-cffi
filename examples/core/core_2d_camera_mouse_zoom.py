@@ -1,67 +1,83 @@
 """
+
 raylib [core] example - 2d camera mouse zoom
+
 """
 
-import pyray
+# Import
+# ------------------------------------------------------------------------------------
+from pyray import *
+# ------------------------------------------------------------------------------------
 
-SCREEN_WIDTH = 800
-SCREEN_HEIGHT = 450
+# ------------------------------------------------------------------------------------
+# Program main entry point
+# ------------------------------------------------------------------------------------
+def main():
+    # Initialization
+    # ------------------------------------------------------------------------------------
 
-pyray.init_window(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib [core] example - 2d camera mouse zoom")
+    SCREEN_WIDTH = 800
+    SCREEN_HEIGHT = 450
 
-pyray.set_target_fps(60)
+    init_window(SCREEN_WIDTH, SCREEN_HEIGHT, "raylib [core] example - 2d camera mouse zoom")
 
-camera = pyray.Camera2D()
+    camera = Camera2D()
+    camera = Camera2D()
+    camera.zoom = 1.0
 
-camera = pyray.Camera2D()
-camera.zoom = 1.0
+    set_target_fps(60)  # Set our game to run at 60 frames-per-second
+    # ------------------------------------------------------------------------------------
 
-pyray.set_target_fps(60); 
+    # Main game loop
+    while not window_should_close():  # Detect window close button or ESC key
+        # Update
+        # ----------------------------------------------------------------------------------
+        if is_mouse_button_down(MOUSE_BUTTON_RIGHT):
+            delta = get_mouse_delta()
+            delta = vector2_scale(delta, -1.0 / camera.zoom)
+            camera.target = vector2_add(camera.target, delta)
 
-# main game loop
-while not pyray.window_should_close():   
-    # update
-    if pyray.is_mouse_button_down(pyray.MOUSE_BUTTON_RIGHT):
-        delta = pyray.get_mouse_delta()
-        delta = pyray.vector2_scale(delta, -1.0 / camera.zoom)
-        camera.target = pyray.vector2_add(camera.target, delta)
+        # zoom based on mouse wheel
+        wheel = get_mouse_wheel_move()
+        if wheel != 0:
 
-    # zoom based on mouse wheel
-    wheel = pyray.get_mouse_wheel_move()
-    if wheel != 0:
+            mouseWorldPos = get_screen_to_world_2d(get_mouse_position(), camera)
+            camera.offset = get_mouse_position()
+            camera.target = mouseWorldPos
+            ZOOM_INCREMENT = 0.125
+            camera.zoom += (wheel*ZOOM_INCREMENT)
 
-        mouseWorldPos = pyray.get_screen_to_world_2d(pyray.get_mouse_position(), camera)
-        
-        camera.offset = pyray.get_mouse_position()
+            if (camera.zoom < ZOOM_INCREMENT): camera.zoom = ZOOM_INCREMENT
+        # ----------------------------------------------------------------------------------
 
-        camera.target = mouseWorldPos
+        # Draw
+        # ----------------------------------------------------------------------------------
+        begin_drawing()
+        clear_background(BLACK)
 
-        ZOOM_INCREMENT = 0.125
+        begin_mode_2d(camera)
 
-        camera.zoom += (wheel*ZOOM_INCREMENT)
-        if (camera.zoom < ZOOM_INCREMENT): camera.zoom = ZOOM_INCREMENT
+        rl_push_matrix()
+        rl_translatef(0, 25*50, 0)
+        rl_rotatef(90, 1, 0, 0)
+        draw_grid(100, 50)
+        rl_pop_matrix()
+
+        draw_circle(100, 100, 50, YELLOW)
+
+        end_mode_2d()
+
+        draw_text("Mouse right button drag to move, mouse wheel to zoom", 10, 10, 20, WHITE);
+        end_drawing()
+        # ----------------------------------------------------------------------------------
+
+    # De-Initialization
+    # ----------------------------------------------------------------------------------
+    close_window()  # Close window and OpenGL context
+    # ----------------------------------------------------------------------------------
 
 
-    # draw
-    pyray.begin_drawing()
-    pyray.clear_background(pyray.BLACK)
-
-    pyray.begin_mode_2d(camera)
-
-    pyray.rl_push_matrix()
-    pyray.rl_translatef(0, 25*50, 0)
-    pyray.rl_rotatef(90, 1, 0, 0)
-    pyray.draw_grid(100, 50)
-    pyray.rl_pop_matrix()
-
-    pyray.draw_circle(100, 100, 50, pyray.YELLOW)
-            
-    pyray.end_mode_2d()
-
-    pyray.draw_text("Mouse right button drag to move, mouse wheel to zoom", 10, 10, 20, pyray.WHITE);
-    
-    pyray.end_drawing()
-
-# de-Initialization
-pyray.close_window()   
+# Execute the main function
+if __name__ == '__main__':
+    main()
 
